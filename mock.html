@@ -1078,6 +1078,8 @@ async function loadDataFromAPI() {
     renderAll();
 
     // URL 파라미터로 학생 자동선택 (counsel.html에서 넘어온 경우)
+    // RAW가 채워진 후에만 실행
+    if (!RAW || RAW.length === 0) return;
     const urlParams = new URLSearchParams(window.location.search);
     const targetHakbun = urlParams.get('hakbun');
     if (targetHakbun) {
