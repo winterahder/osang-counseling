@@ -3920,8 +3920,7 @@ async function switchCTab(idx, hakbun, cls, name) {
   try {
     if (idx === 0) {
       // 모의고사 성적
-      const res  = await jsonp(API_URL + '?action=getMockScores&hakbun=' + hakbun);
-      const data = await res.json();
+      const data = await jsonp(API_URL + '?action=getMockScores&hakbun=' + hakbun);
       if (!data.success) throw new Error(data.error);
       const rounds = ['3월','6월','9월','11월'];
       const sm = {};
@@ -3952,8 +3951,7 @@ async function switchCTab(idx, hakbun, cls, name) {
 
     } else if (idx === 1) {
       // 상담 기록
-      const res  = await jsonp(API_URL + '?action=getCounseling&hakbun=' + hakbun);
-      const data = await res.json();
+      const data = await jsonp(API_URL + '?action=getCounseling&hakbun=' + hakbun);
       if (!data.success) throw new Error(data.error);
       const recs = data.records;
       box.innerHTML = `
@@ -3984,8 +3982,7 @@ async function switchCTab(idx, hakbun, cls, name) {
 
     } else {
       // 희망 대학
-      const res  = await jsonp(API_URL + '?action=getUniversity&hakbun=' + hakbun + '&filledOnly=true');
-      const data = await res.json();
+      const data = await jsonp(API_URL + '?action=getUniversity&hakbun=' + hakbun + '&filledOnly=true');
       if (!data.success) throw new Error(data.error);
       const recs = data.records;
       box.innerHTML = recs.length===0
