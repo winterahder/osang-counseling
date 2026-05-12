@@ -1063,15 +1063,11 @@ function jsonp(url) {
 async function loadDataFromAPI() {
   showPageLoading('구글 시트에서 성적 데이터 불러오는 중...');
   try {
-    const [stuData, mockData] = await Promise.all([
-      jsonp(API_URL + '?action=getStudents&activeOnly=true'),
-      jsonp(API_URL + '?action=getMockScores')
-    ]);
+    const data = await jsonp(API_URL + '?action=getAll&activeOnly=true');
 
-    if (!stuData.success)  throw new Error('학생 데이터 로드 실패');
-    if (!mockData.success) throw new Error('성적 데이터 로드 실패');
+    if (!data.success)  throw new Error('데이터 로드 실패');
 
-    RAW = convertToRAW(stuData.students, mockData.scores);
+    RAW = convertToRAW(data.students, data.scores);
     hidePageLoading();
     renderTeacherBadge();
     initFilters();
