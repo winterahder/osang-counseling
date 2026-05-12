@@ -5,395 +5,192 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>오상고등학교 1학년 학습관리시스템</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root {
-  --bg: #0f1117;
-  --surface: #1a1d2e;
-  --surface2: #232640;
-  --border: rgba(255,255,255,.08);
-  --text: #f0f2ff;
-  --text2: #9aa0c4;
-  --text3: #5a6088;
-  --accent1: #6366f1;
-  --accent2: #ec4899;
-  --accent3: #06b6d4;
-  --success: #10b981;
+  --bg: #0f1117; --surface: #1a1d2e; --border: rgba(255,255,255,.08);
+  --text: #f0f2ff; --text2: #9aa0c4; --text3: #5a6088;
+  --accent1: #6366f1; --accent2: #ec4899; --success: #10b981; --danger: #ef4444;
 }
+body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
 
-body {
-  font-family: 'Noto Sans KR', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-/* 배경 효과 */
-.bg-fx {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  overflow: hidden;
-}
-.bg-fx::before {
-  content: '';
-  position: absolute;
-  width: 600px; height: 600px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(99,102,241,.15) 0%, transparent 70%);
-  top: -200px; left: -100px;
-  animation: drift1 12s ease-in-out infinite alternate;
-}
-.bg-fx::after {
-  content: '';
-  position: absolute;
-  width: 500px; height: 500px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(236,72,153,.12) 0%, transparent 70%);
-  bottom: -150px; right: -100px;
-  animation: drift2 15s ease-in-out infinite alternate;
-}
-@keyframes drift1 { to { transform: translate(60px, 80px); } }
-@keyframes drift2 { to { transform: translate(-50px, -60px); } }
-
-/* 그리드 패턴 */
-.grid-pattern {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background-image:
-    linear-gradient(rgba(99,102,241,.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(99,102,241,.04) 1px, transparent 1px);
-  background-size: 40px 40px;
-}
-
-/* 메인 컨테이너 */
-.wrap {
-  position: relative; z-index: 1;
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 60px 24px 40px;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-/* 헤더 */
-.header {
-  text-align: center;
-  margin-bottom: 56px;
-  animation: fadeDown .6s ease both;
-}
-.school-badge {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: rgba(99,102,241,.12);
-  border: 1px solid rgba(99,102,241,.3);
-  border-radius: 100px;
-  padding: 6px 16px;
-  font-size: 12px; font-weight: 700; color: #818cf8;
-  letter-spacing: 1px; text-transform: uppercase;
-  margin-bottom: 20px;
-}
-.school-badge::before {
-  content: '';
-  width: 6px; height: 6px; border-radius: 50%;
-  background: #6366f1;
-  animation: pulse 2s infinite;
-}
-@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
-
-.main-title {
-  font-size: clamp(28px, 5vw, 42px);
-  font-weight: 900;
-  letter-spacing: -1px;
-  line-height: 1.15;
-  margin-bottom: 14px;
-}
-.main-title span {
-  background: linear-gradient(135deg, #818cf8, #ec4899);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.main-sub {
-  font-size: 14px; color: var(--text2); font-weight: 400; line-height: 1.6;
-}
-
-/* 유저 정보 바 */
-.user-bar {
-  display: flex; align-items: center; justify-content: space-between;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 14px 20px;
-  margin-bottom: 28px;
-  animation: fadeUp .6s .1s ease both;
-}
-.user-info { display: flex; align-items: center; gap: 12px; }
-.user-avatar {
-  width: 36px; height: 36px; border-radius: 50%;
-  background: linear-gradient(135deg, #6366f1, #ec4899);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px; font-weight: 800; color: #fff;
-  flex-shrink: 0;
-}
-.user-name { font-size: 14px; font-weight: 700; }
-.user-role {
-  font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 100px;
-  background: rgba(99,102,241,.15); color: #818cf8;
-}
-.user-email { font-size: 11px; color: var(--text3); margin-top: 1px; }
-.status-dot {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 12px; color: var(--success); font-weight: 600;
-}
-.status-dot::before {
-  content: ''; width: 8px; height: 8px; border-radius: 50%;
-  background: var(--success);
-  animation: pulse 2s infinite;
-}
-
-/* 메뉴 카드 그리드 */
-.menu-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  margin-bottom: 24px;
-  animation: fadeUp .6s .2s ease both;
-}
-
-.menu-card {
-  position: relative;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 28px 24px;
-  cursor: pointer;
-  text-decoration: none;
-  color: inherit;
-  display: flex; flex-direction: column; gap: 16px;
-  transition: all .3s cubic-bezier(.34,1.56,.64,1);
-  overflow: hidden;
-}
-.menu-card::before {
-  content: '';
-  position: absolute; inset: 0;
-  border-radius: 20px;
-  opacity: 0;
-  transition: opacity .3s;
-}
-.menu-card.primary::before {
-  background: linear-gradient(135deg, rgba(99,102,241,.08), rgba(139,92,246,.08));
-}
-.menu-card.secondary::before {
-  background: linear-gradient(135deg, rgba(236,72,153,.08), rgba(244,63,94,.08));
-}
-.menu-card:hover {
-  transform: translateY(-6px);
-  border-color: rgba(255,255,255,.15);
-  box-shadow: 0 20px 40px rgba(0,0,0,.3);
-}
-.menu-card:hover::before { opacity: 1; }
-
-.card-icon {
-  width: 52px; height: 52px; border-radius: 14px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 24px; flex-shrink: 0;
-  position: relative; z-index: 1;
-}
-.primary .card-icon {
-  background: linear-gradient(135deg, rgba(99,102,241,.2), rgba(139,92,246,.2));
-  box-shadow: 0 0 0 1px rgba(99,102,241,.3);
-}
-.secondary .card-icon {
-  background: linear-gradient(135deg, rgba(236,72,153,.2), rgba(244,63,94,.2));
-  box-shadow: 0 0 0 1px rgba(236,72,153,.3);
-}
-
-.card-body { position: relative; z-index: 1; }
-.card-title {
-  font-size: 18px; font-weight: 800; letter-spacing: -.3px;
-  margin-bottom: 6px;
-}
-.card-desc {
-  font-size: 12px; color: var(--text2); line-height: 1.6;
-}
-
-.card-tags {
-  display: flex; flex-wrap: wrap; gap: 6px;
-  position: relative; z-index: 1;
-}
-.tag {
-  font-size: 10px; font-weight: 700; padding: 3px 8px;
-  border-radius: 6px; letter-spacing: .3px;
-}
-.primary .tag { background: rgba(99,102,241,.15); color: #818cf8; }
-.secondary .tag { background: rgba(236,72,153,.15); color: #f472b6; }
-
-.card-arrow {
-  position: absolute; top: 24px; right: 24px;
-  width: 28px; height: 28px; border-radius: 50%;
-  background: rgba(255,255,255,.06);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px; color: var(--text3);
-  transition: all .3s;
-}
-.menu-card:hover .card-arrow {
-  background: rgba(255,255,255,.12);
-  color: var(--text);
-  transform: translate(2px, -2px);
-}
-
-/* 접근 제한 오버레이 */
-.card-lock {
-  position: absolute; inset: 0; z-index: 2;
-  background: rgba(15,17,23,.7);
-  border-radius: 20px;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 8px; backdrop-filter: blur(2px);
-}
-.card-lock .lock-icon { font-size: 28px; }
-.card-lock .lock-text {
-  font-size: 12px; font-weight: 700; color: var(--text2);
-  text-align: center; line-height: 1.5;
-}
-
-/* 공지 / 통계 바 */
-.stats-bar {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-bottom: 24px;
-  animation: fadeUp .6s .3s ease both;
-}
-.stat-item {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px 16px;
-  text-align: center;
-}
-.stat-value {
-  font-size: 22px; font-weight: 900; letter-spacing: -.5px;
-  background: linear-gradient(135deg, #818cf8, #c084fc);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.stat-label { font-size: 10px; color: var(--text3); font-weight: 600; margin-top: 2px; }
-
-/* 하단 정보 */
-.footer {
-  margin-top: auto;
-  padding-top: 32px;
-  display: flex; align-items: center; justify-content: space-between;
-  border-top: 1px solid var(--border);
-  font-size: 11px; color: var(--text3);
-  animation: fadeUp .6s .4s ease both;
-}
-.footer-left { line-height: 1.6; }
-.footer-right { display: flex; gap: 12px; }
-.footer-right a {
-  color: var(--text3); text-decoration: none;
-  transition: color .2s;
-}
-.footer-right a:hover { color: var(--text2); }
+.bg-fx { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
+.bg-fx::before { content:''; position:absolute; width:700px; height:700px; border-radius:50%; background:radial-gradient(circle,rgba(99,102,241,.18) 0%,transparent 70%); top:-250px; left:-150px; animation:drift1 14s ease-in-out infinite alternate; }
+.bg-fx::after  { content:''; position:absolute; width:600px; height:600px; border-radius:50%; background:radial-gradient(circle,rgba(236,72,153,.12) 0%,transparent 70%); bottom:-200px; right:-150px; animation:drift2 18s ease-in-out infinite alternate; }
+.grid-bg { position:fixed; inset:0; z-index:0; pointer-events:none; background-image:linear-gradient(rgba(99,102,241,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.04) 1px,transparent 1px); background-size:48px 48px; }
+@keyframes drift1 { to{transform:translate(80px,100px)} }
+@keyframes drift2 { to{transform:translate(-60px,-80px)} }
+@keyframes blink  { 0%,100%{opacity:1} 50%{opacity:.3} }
+@keyframes spin   { to{transform:rotate(360deg)} }
+@keyframes fadeDown { from{opacity:0;transform:translateY(-16px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeUp   { from{opacity:0;transform:translateY(16px)}  to{opacity:1;transform:translateY(0)} }
 
 /* 로딩 */
-#loadingBar {
-  position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 999;
-  background: linear-gradient(90deg, #6366f1, #ec4899, #06b6d4);
-  background-size: 200% 100%;
-  animation: loadSlide .8s ease forwards, shimmer 1.5s linear infinite;
-  transform-origin: left;
-}
-@keyframes loadSlide { from{transform:scaleX(0)} to{transform:scaleX(1)} }
-@keyframes shimmer { to{background-position:-200% 0} }
+#loadingScreen { position:fixed; inset:0; z-index:99; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; }
+.spinner { width:40px; height:40px; border-radius:50%; border:3px solid rgba(99,102,241,.2); border-top-color:#6366f1; animation:spin .8s linear infinite; }
+.loading-text { font-size:13px; color:var(--text2); font-weight:600; }
 
-/* 애니메이션 */
-@keyframes fadeDown {
-  from { opacity:0; transform:translateY(-20px); }
-  to   { opacity:1; transform:translateY(0); }
-}
-@keyframes fadeUp {
-  from { opacity:0; transform:translateY(16px); }
-  to   { opacity:1; transform:translateY(0); }
-}
+/* 로그인 */
+#loginScreen { position:relative; z-index:1; min-height:100vh; display:none; align-items:center; justify-content:center; padding:24px; }
+.login-box { width:100%; max-width:420px; animation:fadeUp .5s ease both; }
+.login-logo { text-align:center; margin-bottom:32px; }
+.school-tag { display:inline-flex; align-items:center; gap:8px; background:rgba(99,102,241,.12); border:1px solid rgba(99,102,241,.25); border-radius:100px; padding:5px 14px; font-size:11px; font-weight:700; color:#818cf8; letter-spacing:1px; margin-bottom:16px; }
+.school-tag::before { content:''; width:6px; height:6px; border-radius:50%; background:#6366f1; animation:blink 2s infinite; }
+.login-logo h1 { font-size:30px; font-weight:900; letter-spacing:-1px; line-height:1.2; margin-bottom:10px; }
+.login-logo h1 span { background:linear-gradient(135deg,#818cf8,#ec4899); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.login-logo p { font-size:13px; color:var(--text2); line-height:1.6; }
+.login-card { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:28px 24px; margin-bottom:14px; }
+.login-card-title { font-size:15px; font-weight:800; margin-bottom:6px; }
+.login-card-sub { font-size:12px; color:var(--text2); margin-bottom:22px; line-height:1.6; }
+.google-btn { width:100%; display:flex; align-items:center; justify-content:center; gap:12px; background:#fff; border:none; border-radius:12px; padding:13px 20px; font-size:14px; font-weight:700; color:#1a1a1a; cursor:pointer; transition:all .2s; box-shadow:0 2px 8px rgba(0,0,0,.15); }
+.google-btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,.25); }
+.google-btn svg { width:20px; height:20px; flex-shrink:0; }
+.login-divider { display:flex; align-items:center; gap:12px; margin:16px 0; color:var(--text3); font-size:11px; }
+.login-divider::before,.login-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+.login-notice { background:rgba(99,102,241,.08); border:1px solid rgba(99,102,241,.2); border-radius:10px; padding:12px 14px; font-size:11px; color:var(--text2); line-height:1.6; }
+.login-notice strong { color:#818cf8; }
+.login-error { background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.25); border-radius:10px; padding:12px 14px; font-size:12px; color:#fca5a5; line-height:1.6; margin-top:12px; display:none; white-space:pre-line; }
+.login-footer { text-align:center; font-size:11px; color:var(--text3); line-height:1.7; }
 
-/* 반응형 */
-@media (max-width: 600px) {
-  .wrap { padding: 40px 16px 32px; }
-  .menu-grid { grid-template-columns: 1fr; }
-  .stats-bar { grid-template-columns: repeat(2, 1fr); }
-  .user-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
-  .footer { flex-direction: column; gap: 12px; text-align: center; }
+/* 메인 */
+#mainScreen { display:none; position:relative; z-index:1; max-width:900px; margin:0 auto; padding:56px 24px 40px; min-height:100vh; flex-direction:column; }
+.header { text-align:center; margin-bottom:44px; animation:fadeDown .5s ease both; }
+.school-badge { display:inline-flex; align-items:center; gap:8px; background:rgba(99,102,241,.12); border:1px solid rgba(99,102,241,.25); border-radius:100px; padding:5px 14px; font-size:11px; font-weight:700; color:#818cf8; letter-spacing:1px; margin-bottom:14px; }
+.school-badge::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--success); animation:blink 2s infinite; }
+.main-title { font-size:clamp(26px,4.5vw,38px); font-weight:900; letter-spacing:-1px; line-height:1.2; margin-bottom:8px; }
+.main-title span { background:linear-gradient(135deg,#818cf8,#ec4899); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.main-sub { font-size:13px; color:var(--text2); }
+
+.user-bar { display:flex; align-items:center; justify-content:space-between; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px 20px; margin-bottom:20px; animation:fadeUp .5s .05s ease both; }
+.user-info { display:flex; align-items:center; gap:12px; }
+.user-avatar { width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,#6366f1,#ec4899); display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:800; color:#fff; flex-shrink:0; overflow:hidden; }
+.user-avatar img { width:100%; height:100%; object-fit:cover; }
+.user-name { font-size:14px; font-weight:700; }
+.user-role { font-size:11px; font-weight:700; padding:2px 8px; border-radius:100px; }
+.user-email { font-size:11px; color:var(--text3); margin-top:1px; }
+.logout-btn { background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.2); color:#fca5a5; border-radius:8px; padding:6px 12px; font-size:11px; font-weight:700; cursor:pointer; transition:all .2s; white-space:nowrap; }
+.logout-btn:hover { background:rgba(239,68,68,.2); }
+
+.stats-bar { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:18px; animation:fadeUp .5s .1s ease both; }
+.stat-item { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px; text-align:center; }
+.stat-value { font-size:22px; font-weight:900; letter-spacing:-.5px; background:linear-gradient(135deg,#818cf8,#c084fc); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.stat-label { font-size:10px; color:var(--text3); font-weight:600; margin-top:2px; }
+
+.menu-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-bottom:22px; animation:fadeUp .5s .15s ease both; }
+.menu-card { position:relative; background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:26px 22px; cursor:pointer; text-decoration:none; color:inherit; display:flex; flex-direction:column; gap:14px; transition:all .3s cubic-bezier(.34,1.56,.64,1); overflow:hidden; }
+.menu-card::before { content:''; position:absolute; inset:0; border-radius:20px; opacity:0; transition:opacity .3s; }
+.menu-card.primary::before { background:linear-gradient(135deg,rgba(99,102,241,.08),rgba(139,92,246,.08)); }
+.menu-card.secondary::before { background:linear-gradient(135deg,rgba(236,72,153,.08),rgba(244,63,94,.08)); }
+.menu-card:hover { transform:translateY(-6px); border-color:rgba(255,255,255,.15); box-shadow:0 20px 40px rgba(0,0,0,.3); }
+.menu-card:hover::before { opacity:1; }
+.card-icon { width:50px; height:50px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:22px; position:relative; z-index:1; }
+.primary .card-icon { background:rgba(99,102,241,.15); box-shadow:0 0 0 1px rgba(99,102,241,.25); }
+.secondary .card-icon { background:rgba(236,72,153,.15); box-shadow:0 0 0 1px rgba(236,72,153,.25); }
+.card-body { position:relative; z-index:1; }
+.card-title { font-size:17px; font-weight:800; letter-spacing:-.3px; margin-bottom:5px; }
+.card-desc { font-size:12px; color:var(--text2); line-height:1.6; }
+.card-tags { display:flex; flex-wrap:wrap; gap:5px; position:relative; z-index:1; }
+.tag { font-size:10px; font-weight:700; padding:2px 7px; border-radius:5px; }
+.primary .tag { background:rgba(99,102,241,.15); color:#818cf8; }
+.secondary .tag { background:rgba(236,72,153,.15); color:#f472b6; }
+.card-arrow { position:absolute; top:20px; right:20px; width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,.06); display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--text3); transition:all .3s; }
+.menu-card:hover .card-arrow { background:rgba(255,255,255,.12); color:var(--text); transform:translate(2px,-2px); }
+.card-lock { position:absolute; inset:0; z-index:2; background:rgba(15,17,23,.75); border-radius:20px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; backdrop-filter:blur(3px); }
+.card-lock .lock-icon { font-size:26px; }
+.card-lock .lock-text { font-size:12px; font-weight:700; color:var(--text2); text-align:center; line-height:1.5; }
+
+.main-footer { margin-top:auto; padding-top:24px; display:flex; align-items:center; justify-content:space-between; border-top:1px solid var(--border); font-size:11px; color:var(--text3); animation:fadeUp .5s .2s ease both; }
+
+@media(max-width:600px) {
+  #mainScreen { padding:32px 16px 28px; }
+  .menu-grid,.stats-bar { grid-template-columns:repeat(2,1fr); }
+  .menu-grid { grid-template-columns:1fr; }
+  .user-bar { flex-direction:column; align-items:flex-start; gap:10px; }
+  .main-footer { flex-direction:column; gap:10px; text-align:center; }
 }
 </style>
 </head>
 <body>
-
 <div class="bg-fx"></div>
-<div class="grid-pattern"></div>
-<div id="loadingBar"></div>
+<div class="grid-bg"></div>
 
-<div class="wrap">
+<!-- 로딩 -->
+<div id="loadingScreen">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">로그인 상태 확인 중...</div>
+</div>
 
-  <!-- 헤더 -->
-  <div class="header">
-    <div class="school-badge">오상고등학교 · 2026학년도</div>
-    <div class="main-title">
-      1학년 <span>학습관리</span><br>시스템
+<!-- 로그인 화면 -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="school-tag">오상고등학교 · 2026학년도</div>
+      <h1>1학년 <span>학습관리</span><br>시스템</h1>
+      <p>모의고사 분석 · 학생 상담 · 성적 관리</p>
     </div>
-    <div class="main-sub">모의고사 분석 · 학생 상담 · 성적 관리를 한 곳에서</div>
-  </div>
-
-  <!-- 유저 정보 바 -->
-  <div class="user-bar">
-    <div class="user-info">
-      <div class="user-avatar" id="avatarInitial">?</div>
-      <div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span class="user-name" id="userName">확인 중...</span>
-          <span class="user-role" id="userRole">-</span>
-        </div>
-        <div class="user-email" id="userEmail"></div>
+    <div class="login-card">
+      <div class="login-card-title">교사 로그인</div>
+      <div class="login-card-sub">
+        오상고등학교 구글 계정으로 로그인하세요.<br>
+        <strong style="color:#818cf8">@osang.hs.kr</strong> 계정만 접근 가능합니다.
+      </div>
+      <button class="google-btn" onclick="signInWithGoogle()">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Google 계정으로 로그인
+      </button>
+      <div id="loginError" class="login-error"></div>
+      <div class="login-divider">보안 안내</div>
+      <div class="login-notice">
+        🔒 이 시스템은 <strong>학생 개인정보</strong>를 포함합니다.<br>
+        학교 계정 외 접근은 차단되며 접속 기록이 남습니다.
       </div>
     </div>
-    <div class="status-dot" id="statusDot">연결 중...</div>
+    <div class="login-footer">
+      오상고등학교 교무부 · 문의: 담당 교사<br>
+      본 시스템은 교내 업무용으로만 사용하세요.
+    </div>
   </div>
+</div>
 
-  <!-- 통계 바 -->
+<!-- 메인 화면 -->
+<div id="mainScreen">
+  <div class="header">
+    <div class="school-badge">오상고등학교 · 2026학년도 · 로그인됨</div>
+    <div class="main-title">1학년 <span>학습관리</span>시스템</div>
+    <div class="main-sub">모의고사 분석 · 학생 상담 · 성적 관리를 한 곳에서</div>
+  </div>
+  <div class="user-bar">
+    <div class="user-info">
+      <div class="user-avatar" id="userAvatar">?</div>
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span class="user-name" id="userName">-</span>
+          <span class="user-role" id="userRoleBadge">-</span>
+        </div>
+        <div class="user-email" id="userEmail">-</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="signOut()">로그아웃</button>
+  </div>
   <div class="stats-bar">
-    <div class="stat-item">
-      <div class="stat-value">258</div>
-      <div class="stat-label">전체 학생</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-value">10</div>
-      <div class="stat-label">학급 수</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-value" id="statMock">3월</div>
-      <div class="stat-label">최근 모의고사</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-value">2026</div>
-      <div class="stat-label">학년도</div>
-    </div>
+    <div class="stat-item"><div class="stat-value">258</div><div class="stat-label">전체 학생</div></div>
+    <div class="stat-item"><div class="stat-value">10</div><div class="stat-label">학급 수</div></div>
+    <div class="stat-item"><div class="stat-value">3월</div><div class="stat-label">최근 모의고사</div></div>
+    <div class="stat-item"><div class="stat-value">2026</div><div class="stat-label">학년도</div></div>
   </div>
-
-  <!-- 메뉴 카드 -->
   <div class="menu-grid">
-
-    <!-- 모의고사 분석 -->
-    <a href="mock.html" class="menu-card primary" id="cardMock">
+    <a href="mock.html" class="menu-card primary">
       <div class="card-arrow">→</div>
       <div class="card-icon">📊</div>
       <div class="card-body">
         <div class="card-title">모의고사 분석</div>
-        <div class="card-desc">
-          학년 · 학급 · 학생별 성적 분석<br>
-          문항별 정오 · 약점 파트 진단<br>
-          수능최저 충족 대학 라인 확인
-        </div>
+        <div class="card-desc">학년·학급·학생별 성적 분석<br>문항별 정오·약점 파트 진단<br>수능최저 충족 대학 라인 확인</div>
       </div>
       <div class="card-tags">
         <span class="tag">전체 교사</span>
@@ -401,107 +198,206 @@ body {
         <span class="tag">문항 분석</span>
       </div>
     </a>
-
-    <!-- 학생 상담카드 -->
     <a href="counsel.html" class="menu-card secondary" id="cardCounsel">
       <div class="card-arrow">→</div>
       <div class="card-icon">📋</div>
       <div class="card-body">
         <div class="card-title">학생 상담카드</div>
-        <div class="card-desc">
-          학생별 상담 기록 관리<br>
-          내신 · 모의고사 통합 조회<br>
-          희망 대학 · 전형 관리
-        </div>
+        <div class="card-desc">학생별 상담 기록 관리<br>내신·모의고사 통합 조회<br>희망 대학·전형 관리</div>
       </div>
       <div class="card-tags">
         <span class="tag">담임 전용</span>
         <span class="tag">상담 기록</span>
         <span class="tag">진학 관리</span>
       </div>
-      <!-- 권한 없을 때 자물쇠 표시 (JS로 제어) -->
       <div class="card-lock" id="lockCounsel" style="display:none">
         <div class="lock-icon">🔒</div>
-        <div class="lock-text">담임 · 학년부장<br>전용 메뉴입니다</div>
+        <div class="lock-text">담임·학년부장<br>전용 메뉴입니다</div>
       </div>
     </a>
-
   </div>
-
-  <!-- 푸터 -->
-  <div class="footer">
-    <div class="footer-left">
-      오상고등학교 1학년 학습관리시스템<br>
-      문의: 교무부 / 데이터 기준일 2026.05.11
-    </div>
-    <div class="footer-right">
-      <a href="mock.html">모의고사</a>
-      <a href="counsel.html">상담카드</a>
+  <div class="main-footer">
+    <div>오상고등학교 1학년 학습관리시스템 · 데이터 기준일 2026.05.11</div>
+    <div style="display:flex;gap:12px">
+      <a href="mock.html" style="color:var(--text3);text-decoration:none">모의고사</a>
+      <a href="counsel.html" style="color:var(--text3);text-decoration:none">상담카드</a>
     </div>
   </div>
-
 </div>
 
 <script>
-// ── API 설정 ──────────────────────────────────────
+// ══════════════════════════════════════════
+// ⚠️ 아래 두 값을 반드시 교체하세요!
+const CLIENT_ID      = '500227273993-2eiqe05qsfjprb6qcf45r54qjebgigg6.apps.googleusercontent.com.apps.googleusercontent.com';
 const API_URL = 'AKfycbygPe-OdVqtQEUHvM-j_hP1Vm8YX1mbMGsrBY8n2Qgg710yLkobNjxwgCvJzM6D_3vBrg';
+const ALLOWED_DOMAIN = 'osang.hs.kr';
+// ══════════════════════════════════════════
 
-// ── 교사 권한 확인 ────────────────────────────────
-async function initPage() {
-  try {
-    const res = await fetch(API_URL + '?action=getMyRole');
-    const data = await res.json();
+let currentUser    = null;
+let currentTeacher = null;
 
-    if (!data.success) throw new Error('권한 확인 실패');
-
-    const { name, email, role, isHomeroom, isGradeHead, isAdmin } = data;
-
-    // 유저 정보 표시
-    document.getElementById('avatarInitial').textContent = name ? name[0] : email[0].toUpperCase();
-    document.getElementById('userName').textContent  = name || email;
-    document.getElementById('userEmail').textContent = email;
-    document.getElementById('statusDot').textContent = '연결됨';
-
-    const roleLabel = isAdmin      ? '관리자' :
-                      isGradeHead  ? '학년부장' :
-                      isHomeroom   ? `${data.cls}반 담임` : '열람';
-    const roleBg    = isAdmin      ? 'rgba(124,58,237,.2)' :
-                      isGradeHead  ? 'rgba(8,145,178,.2)'  :
-                      isHomeroom   ? 'rgba(5,150,105,.2)'  : 'rgba(100,116,139,.2)';
-    const roleColor = isAdmin      ? '#a78bfa' :
-                      isGradeHead  ? '#22d3ee'  :
-                      isHomeroom   ? '#34d399'  : '#94a3b8';
-
-    const roleEl = document.getElementById('userRole');
-    roleEl.textContent = roleLabel;
-    roleEl.style.background = roleBg;
-    roleEl.style.color = roleColor;
-
-    // 상담카드 접근 권한 체크
-    const canCounsel = isAdmin || isGradeHead || isHomeroom;
-    if (!canCounsel) {
-      document.getElementById('lockCounsel').style.display = 'flex';
-      document.getElementById('cardCounsel').style.cursor  = 'default';
-      document.getElementById('cardCounsel').onclick = e => e.preventDefault();
+// 페이지 로드 시 세션 확인
+window.addEventListener('load', async () => {
+  const saved = sessionStorage.getItem('gs_user');
+  if (saved) {
+    try {
+      currentUser = JSON.parse(saved);
+      const savedTeacher = sessionStorage.getItem('gs_teacher');
+      currentTeacher = savedTeacher ? JSON.parse(savedTeacher) : null;
+      if (!currentTeacher) await loadTeacherRole();
+      showMain();
+      return;
+    } catch(e) {
+      sessionStorage.clear();
     }
-
-  } catch (err) {
-    // API 실패 시 — 오프라인 모드
-    document.getElementById('userName').textContent  = '오프라인 모드';
-    document.getElementById('userRole').textContent  = '연결 오류';
-    document.getElementById('statusDot').textContent = '⚠️ 시트 연결 안됨';
-    document.getElementById('statusDot').style.color = '#f59e0b';
-    console.warn('API 연결 실패:', err.message);
   }
+  showLogin();
+});
 
-  // 로딩바 제거
-  setTimeout(() => {
-    const bar = document.getElementById('loadingBar');
-    if (bar) bar.style.opacity = '0';
-  }, 800);
+// 구글 로그인
+function signInWithGoogle() {
+  if (typeof google === 'undefined') {
+    showLoginError('Google 로그인 라이브러리 로딩 중입니다.\n잠시 후 다시 시도해주세요.');
+    return;
+  }
+  setLoading('Google 로그인 중...');
+  google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: 'email profile openid',
+    callback: async (response) => {
+      if (response.error) {
+        showLoginError('로그인 취소 또는 실패: ' + response.error);
+        return;
+      }
+      try {
+        setLoading('계정 확인 중...');
+        const infoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: 'Bearer ' + response.access_token }
+        });
+        const info = await infoRes.json();
+
+        // 도메인 체크
+        if (!info.email.endsWith('@' + ALLOWED_DOMAIN)) {
+          showLoginError(
+            `❌ 접근 권한이 없습니다.\n\n` +
+            `이 시스템은 @${ALLOWED_DOMAIN} 계정만 사용할 수 있습니다.\n` +
+            `현재 로그인 계정: ${info.email}`
+          );
+          return;
+        }
+
+        currentUser = {
+          email:   info.email,
+          name:    info.name,
+          picture: info.picture,
+          token:   response.access_token
+        };
+        sessionStorage.setItem('gs_user', JSON.stringify(currentUser));
+
+        setLoading('권한 확인 중...');
+        await loadTeacherRole();
+        showMain();
+
+      } catch(e) {
+        showLoginError('오류가 발생했습니다: ' + e.message);
+      }
+    }
+  }).requestAccessToken();
 }
 
-initPage();
+// 교사 권한 로드
+async function loadTeacherRole() {
+  try {
+    const res  = await fetch(`${API_URL}?action=getMyRole`);
+    const data = await res.json();
+    currentTeacher = data.success ? data : makeViewerRole();
+  } catch(e) {
+    currentTeacher = makeViewerRole();
+  }
+  sessionStorage.setItem('gs_teacher', JSON.stringify(currentTeacher));
+}
+
+function makeViewerRole() {
+  return {
+    email: currentUser?.email || '',
+    name:  currentUser?.name  || '',
+    role: 'viewer', cls: null,
+    isHomeroom: false, isGradeHead: false, isAdmin: false
+  };
+}
+
+// 화면 전환
+function showLogin() {
+  document.getElementById('loadingScreen').style.display = 'none';
+  document.getElementById('loginScreen').style.display   = 'flex';
+  document.getElementById('mainScreen').style.display    = 'none';
+}
+function showMain() {
+  document.getElementById('loadingScreen').style.display = 'none';
+  document.getElementById('loginScreen').style.display   = 'none';
+  document.getElementById('mainScreen').style.display    = 'flex';
+  renderUserInfo();
+}
+function setLoading(text) {
+  document.getElementById('loadingScreen').style.display = 'flex';
+  document.getElementById('loadingText').textContent     = text || '로딩 중...';
+  document.getElementById('loginScreen').style.display   = 'none';
+  document.getElementById('mainScreen').style.display    = 'none';
+}
+
+// 유저 정보 렌더
+function renderUserInfo() {
+  if (!currentUser) return;
+  const avatarEl = document.getElementById('userAvatar');
+  if (currentUser.picture) {
+    avatarEl.innerHTML = `<img src="${currentUser.picture}" alt="">`;
+  } else {
+    avatarEl.textContent = (currentUser.name || currentUser.email)[0].toUpperCase();
+  }
+  document.getElementById('userName').textContent  = currentUser.name  || currentUser.email;
+  document.getElementById('userEmail').textContent = currentUser.email;
+
+  const t = currentTeacher || {};
+  const roleLabel = t.isAdmin ? '관리자' : t.isGradeHead ? '학년부장' : t.isHomeroom ? `${t.cls}반 담임` : '열람 전용';
+  const styles = {
+    admin:    { bg:'rgba(124,58,237,.2)',  color:'#a78bfa' },
+    gradeHead:{ bg:'rgba(8,145,178,.2)',   color:'#22d3ee' },
+    homeroom: { bg:'rgba(5,150,105,.2)',   color:'#34d399' },
+    viewer:   { bg:'rgba(100,116,139,.2)', color:'#94a3b8' }
+  };
+  const sk = t.isAdmin ? 'admin' : t.isGradeHead ? 'gradeHead' : t.isHomeroom ? 'homeroom' : 'viewer';
+  const roleEl = document.getElementById('userRoleBadge');
+  roleEl.textContent      = roleLabel;
+  roleEl.style.background = styles[sk].bg;
+  roleEl.style.color      = styles[sk].color;
+
+  // 상담카드 잠금
+  if (!t.isAdmin && !t.isGradeHead && !t.isHomeroom) {
+    document.getElementById('lockCounsel').style.display = 'flex';
+    const card = document.getElementById('cardCounsel');
+    card.style.cursor = 'default';
+    card.onclick = e => e.preventDefault();
+  }
+}
+
+// 로그아웃
+function signOut() {
+  if (!confirm('로그아웃 하시겠습니까?')) return;
+  sessionStorage.clear();
+  currentUser = currentTeacher = null;
+  if (typeof google !== 'undefined') google.accounts.id.disableAutoSelect();
+  showLogin();
+}
+
+// 에러
+function showLoginError(msg) {
+  document.getElementById('loadingScreen').style.display = 'none';
+  document.getElementById('loginScreen').style.display   = 'flex';
+  document.getElementById('mainScreen').style.display    = 'none';
+  const el = document.getElementById('loginError');
+  el.textContent   = msg;
+  el.style.display = 'block';
+}
 </script>
 </body>
 </html>
