@@ -1077,6 +1077,31 @@ async function loadDataFromAPI() {
     initFilters();
     renderAll();
 
+    // URL 파라미터로 학생 자동선택 (counsel.html에서 넘어온 경우)
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetHakbun = urlParams.get('hakbun');
+    if (targetHakbun) {
+      const cls = parseInt(targetHakbun.slice(0, -2)) || parseInt(targetHakbun.slice(0, 1));
+      const num = parseInt(targetHakbun.slice(-2));
+      // 반 필터 설정
+      const clsKey = String(cls);
+      if (state.filters.cls !== clsKey) {
+        state.filters.cls = clsKey;
+        renderAll();
+      }
+      // 학생 찾아서 선택
+      const found = RAW.find(r => r.cls === cls && r.num === num);
+      if (found) {
+        state.selectedStudent = found.name;
+        state.selectedCls = found.cls;
+        renderAll();
+        setTimeout(() => {
+          const el = document.getElementById('studentDetail');
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 300);
+      }
+    }
+
   } catch(err) {
     hidePageLoading();
     console.error('API 오류:', err);
@@ -3842,14 +3867,15 @@ function buildPrintHTML(s) {
 
 
 // ════════════════════════════════════════════════
-// 상담카드 버튼 (담임/학년부장/관리자만 표시)
+// 상담카드 버튼 (담임/학년부장/관리자만 표시) → counsel.html로 페이지 이동
 // ════════════════════════════════════════════════
 function makeCounselingBtn(s) {
   const t = _teacher || {};
   const canAccess = t.isAdmin || t.isGradeHead || (t.isHomeroom && t.cls === s.cls);
   if (!canAccess) return '';
+  const hakbun = String(s.cls) + String(s.num).padStart(2,'0');
   return `<button
-    onclick="openCounselingPopup(event,'${encodeURIComponent(JSON.stringify({cls:s.cls,num:s.num,name:s.name}))}')"
+    onclick="location.href='counsel.html?hakbun=${hakbun}'"
     style="background:linear-gradient(135deg,#ec4899,#f43f5e);color:#fff;border:none;border-radius:8px;
            padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer;
            display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(236,72,153,.35);
@@ -4050,16 +4076,16 @@ async function submitCounsel(hakbun, name, cls) {
   const follow  = document.getElementById('_cFollow')?.value;
   if (!cnt?.trim()) { alert('상담 내용을 입력해주세요.'); return; }
   try {
-    const res = await fetch(API_URL, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        action:'saveCounseling', hakbun,
-        '상담일자':date, '상담유형':type, '상담내용':cnt,
-        '후속조치':follow, '담당교사':_user?.name||_user?.email||''
-      })
+    const params = new URLSearchParams({
+      action: 'saveCounseling',
+      hakbun: hakbun,
+      '상담일자': date,
+      '상담유형': type,
+      '상담내용': cnt,
+      '후속조치': follow || '',
+      '담당교사': _user?.name || _user?.email || ''
     });
-    const data = await res.json();
+    const data = await jsonp(API_URL + '?' + params.toString());
     if (!data.success) throw new Error(data.error);
     alert('✅ 저장 완료!');
     switchCTab(1, hakbun, cls, name);
