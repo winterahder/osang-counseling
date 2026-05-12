@@ -1081,17 +1081,19 @@ async function loadDataFromAPI() {
     const urlParams = new URLSearchParams(window.location.search);
     const targetHakbun = urlParams.get('hakbun');
     if (targetHakbun) {
-      const cls = parseInt(targetHakbun.slice(0, -2)) || parseInt(targetHakbun.slice(0, 1));
-      const num = parseInt(targetHakbun.slice(-2));
-      // 반 필터 설정
-      const clsKey = String(cls);
-      if (state.filters.cls !== clsKey) {
-        state.filters.cls = clsKey;
-        renderAll();
+      let found = null;
+      // 5자리 학번: 학년(1) + 반(2자리) + 번호(2자리) → 예: 10310 = 3반10번
+      if (targetHakbun.length === 5) {
+        const cls = parseInt(targetHakbun.slice(1, 3));
+        const num = parseInt(targetHakbun.slice(3, 5));
+        found = RAW.find(r => r.cls === cls && r.num === num);
       }
-      // 학생 찾아서 선택
-      const found = RAW.find(r => r.cls === cls && r.num === num);
       if (found) {
+        const clsKey = String(found.cls);
+        if (state.filters.cls !== clsKey) {
+          state.filters.cls = clsKey;
+          renderAll();
+        }
         state.selectedStudent = found.name;
         state.selectedCls = found.cls;
         renderAll();
