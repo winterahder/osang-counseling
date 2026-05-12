@@ -485,6 +485,18 @@ function downloadCSVTemplate(){
 }
 
 /* ─ SIDEBAR ─ */
+function goToMock(hakbun) {
+  // 구글시트 학번(3자리: 반+번호) → mock.html용 5자리(1+반2자리+번호2자리)
+  // 예: 101 → 10101,  310 → 10310
+  let mockHak = String(hakbun);
+  if (mockHak.length === 3) {
+    const cls = mockHak.slice(0, 1).padStart(2, '0');
+    const num = mockHak.slice(1, 3);
+    mockHak = '1' + cls + num;
+  }
+  location.href = 'mock.html?hakbun=' + mockHak;
+}
+
 function renderSidebar(){
   const el=document.getElementById('sbList');
   el.innerHTML='';
@@ -663,20 +675,7 @@ function buildGwagwa(s){
   <div class="sec">
     <div class="sec-title" style="display:flex;align-items:center;justify-content:space-between">
       <span>모의고사 결과 및 분석</span>
-      <button onclick="(function(){
-        const hak = '${s.hakbun}';
-        // 구글시트 학번(3자리: 반+번호) → mock.html용 5자리(1+반2자리+번호2자리)
-        // 예: 101 → 10101, 310 → 10310
-        let mockHak = hak;
-        if (hak.length === 3) {
-          const cls = hak.slice(0,1).padStart(2,'0');
-          const num = hak.slice(1,3);
-          mockHak = '1' + cls + num;
-        } else if (hak.length === 5 && hak.startsWith('1')) {
-          mockHak = hak; // 이미 5자리
-        }
-        location.href='mock.html?hakbun=' + mockHak;
-      })()"
+      <button onclick="goToMock('${s.hakbun}')"
         style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:8px;
                padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;
                display:flex;align-items:center;gap:4px;box-shadow:0 2px 8px rgba(99,102,241,.35)">
