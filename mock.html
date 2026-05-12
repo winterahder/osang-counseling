@@ -1102,14 +1102,14 @@ async function loadDataFromAPI() {
       }
 
       if (found) {
-        const clsKey = String(found.cls);
-        if (state.filters.cls !== clsKey) {
-          state.filters.cls = clsKey;
-          renderAll();
-        }
-        state.selectedStudent = found.name;
-        state.selectedCls = found.cls;
+        state.selectedClass   = found.cls;
+        state.selectedStudent = found;
         renderAll();
+        setTimeout(() => {
+          const el = document.getElementById('studentDetail');
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 300);
+      }
         setTimeout(() => {
           const el = document.getElementById('studentDetail');
           if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
