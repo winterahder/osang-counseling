@@ -1215,17 +1215,13 @@ async function loadStudentsFromAPI() {
     const clsParam = (t.isHomeroom && !t.isGradeHead && !t.isAdmin)
       ? `&cls=${t.cls}` : '';
 
-    const [stuRes, mockRes, counselRes, univRes] = await Promise.all([
-      fetch(`${API_URL}?action=getStudents&activeOnly=true${clsParam}`),
-      fetch(`${API_URL}?action=getMockScores${clsParam}`),
-      fetch(`${API_URL}?action=getCounseling${clsParam}`),
-      fetch(`${API_URL}?action=getUniversity${clsParam}`)
-    ]);
+    const allRes  = await fetch(`${API_URL}?action=getAllCounsel&activeOnly=true${clsParam}`);
+    const allData = await allRes.json();
 
-    const stuData    = await stuRes.json();
-    const mockData   = await mockRes.json();
-    const counselData= await counselRes.json();
-    const univData   = await univRes.json();
+    const stuData     = { success: allData.success, students:  allData.students  || [] };
+    const mockData    = { success: allData.success, scores:    allData.scores    || [] };
+    const counselData = { success: allData.success, records:   allData.counseling || [] };
+    const univData    = { success: allData.success, records:   allData.university || [] };
 
     if (!stuData.success) throw new Error('학생 데이터 로드 실패');
 
