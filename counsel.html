@@ -661,7 +661,15 @@ function buildGwagwa(s){
   </div>
 
   <div class="sec">
-    <div class="sec-title">모의고사 결과 및 분석</div>
+    <div class="sec-title" style="display:flex;align-items:center;justify-content:space-between">
+      <span>모의고사 결과 및 분석</span>
+      <button onclick="location.href='mock.html?hakbun=${s.hakbun}'"
+        style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:8px;
+               padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;
+               display:flex;align-items:center;gap:4px;box-shadow:0 2px 8px rgba(99,102,241,.35)">
+        📊 모의고사 시스템에서 자세히 보기
+      </button>
+    </div>
     <div class="mock-head-row">
       <select class="mock-month-sel" id="mockSel" onchange="refreshMockDetail(${s.id})">
         ${EXAM_MONTHS.map(m=>`<option${(s.mockSel||'3월')===m?' selected':''}>${m}</option>`).join('')}
@@ -1301,6 +1309,22 @@ async function loadStudentsFromAPI() {
     renderSidebar();
     renderMain();
     showToast(`✅ ${students.length}명 데이터 로드 완료`);
+
+    // URL 파라미터로 학생 자동선택 (mock.html에서 넘어온 경우)
+    const urlHakbun = new URLSearchParams(window.location.search).get('hakbun');
+    if (urlHakbun) {
+      const found = students.find(s => s.hakbun === urlHakbun || String(s.hakbun) === String(urlHakbun));
+      if (found) {
+        activeId = found.id;
+        openId = found.id;
+        renderSidebar();
+        renderMain();
+        setTimeout(() => {
+          const el = document.querySelector('.student-card, .main-card, #mainContent');
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 200);
+      }
+    }
 
   } catch(err) {
     console.error('API 로드 실패:', err);
