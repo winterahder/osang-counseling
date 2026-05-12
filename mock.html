@@ -1032,15 +1032,41 @@ function hidePageLoading() {
   if (el) el.style.display = 'none';
 }
 
+
+// ── JSONP 헬퍼 (CORS 우회) ──────────────────────────────────
+function jsonp(url) {
+  return new Promise((resolve, reject) => {
+    const cb = '_cb_' + Date.now() + '_' + Math.floor(Math.random()*10000);
+    const script = document.createElement('script');
+    const timer = setTimeout(() => {
+      reject(new Error('JSONP 타임아웃'));
+      delete window[cb];
+      script.remove();
+    }, 15000);
+    window[cb] = (data) => {
+      clearTimeout(timer);
+      resolve(data);
+      delete window[cb];
+      script.remove();
+    };
+    script.onerror = () => {
+      clearTimeout(timer);
+      reject(new Error('JSONP 스크립트 로드 실패'));
+      delete window[cb];
+      script.remove();
+    };
+    script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cb;
+    document.head.appendChild(script);
+  });
+}
+
 async function loadDataFromAPI() {
   showPageLoading('구글 시트에서 성적 데이터 불러오는 중...');
   try {
-    const [stuRes, mockRes] = await Promise.all([
-      fetch(API_URL + '?action=getStudents&activeOnly=true'),
-      fetch(API_URL + '?action=getMockScores')
+    const [stuData, mockData] = await Promise.all([
+      jsonp(API_URL + '?action=getStudents&activeOnly=true'),
+      jsonp(API_URL + '?action=getMockScores')
     ]);
-    const stuData  = await stuRes.json();
-    const mockData = await mockRes.json();
 
     if (!stuData.success)  throw new Error('학생 데이터 로드 실패');
     if (!mockData.success) throw new Error('성적 데이터 로드 실패');
@@ -3894,7 +3920,7 @@ async function switchCTab(idx, hakbun, cls, name) {
   try {
     if (idx === 0) {
       // 모의고사 성적
-      const res  = await fetch(`${API_URL}?action=getMockScores&hakbun=${hakbun}`);
+      const res  = await jsonp(API_URL + '?action=getMockScores&hakbun=' + hakbun);
       const data = await res.json();
       if (!data.success) throw new Error(data.error);
       const rounds = ['3월','6월','9월','11월'];
@@ -3926,7 +3952,7 @@ async function switchCTab(idx, hakbun, cls, name) {
 
     } else if (idx === 1) {
       // 상담 기록
-      const res  = await fetch(`${API_URL}?action=getCounseling&hakbun=${hakbun}`);
+      const res  = await jsonp(API_URL + '?action=getCounseling&hakbun=' + hakbun);
       const data = await res.json();
       if (!data.success) throw new Error(data.error);
       const recs = data.records;
@@ -3958,7 +3984,7 @@ async function switchCTab(idx, hakbun, cls, name) {
 
     } else {
       // 희망 대학
-      const res  = await fetch(`${API_URL}?action=getUniversity&hakbun=${hakbun}&filledOnly=true`);
+      const res  = await jsonp(API_URL + '?action=getUniversity&hakbun=' + hakbun + '&filledOnly=true');
       const data = await res.json();
       if (!data.success) throw new Error(data.error);
       const recs = data.records;
